@@ -1,18 +1,30 @@
--- Esquema Inicial Cloudflare D1 para P26-2B-5505-D65C-D22D-30ED (Projeto #12)
-CREATE TABLE IF NOT EXISTS discord_users (
-  user_id TEXT PRIMARY KEY,
-  username TEXT NOT NULL,
-  avatar TEXT,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    discord_id TEXT UNIQUE NOT NULL,
+    username TEXT NOT NULL,
+    avatar TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS project_records (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id TEXT NOT NULL,
-  username TEXT NOT NULL,
-  chave_projeto TEXT NOT NULL,
-  conteudo TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS notes (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_project_records_user ON project_records(user_id);
+CREATE TABLE IF NOT EXISTS tags (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS note_tags (
+    note_id TEXT NOT NULL,
+    tag_id TEXT NOT NULL,
+    PRIMARY KEY (note_id, tag_id),
+    FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);
