@@ -1,69 +1,95 @@
-const CHAVE_PROJETO = "P26-2B-5505-D65C-D22D-30ED";
+// public/app.js
 
-const discordSession = {
-  user_id: "discord_" + CHAVE_PROJETO.slice(-4).toLowerCase(),
-  username: "João",
-  avatar: "https://cdn.discordapp.com/embed/avatars/0.png",
-};
+/**
+ * 1. Interpretador Markdown (Regex)
+ * Converte texto Markdown básico em HTML.
+ */
+function parseMarkdown(markdownText) {
+    if (!markdownText) return "";
 
-function renderDiscordHeader() {
-  const el = document.getElementById("discordUserText");
-  if (el) {
-    el.textContent = "Discord: " + discordSession.username + " (" + discordSession.user_id + ")";
-  }
+    let html = markdownText;
+
+    // Cabeçalhos (H1, H2, H3)
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+    // Negrito e Itálico
+    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+
+    // Blockquotes
+    html = html.replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+    // Links: [Texto](URL)
+    html = html.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+    // Listas não ordenadas (hífen)
+    html = html.replace(/^\- (.*$)/gim, '<ul><li>$1</li></ul>');
+    // Junta listas adjacentes para evitar múltiplos <ul> soltos
+    html = html.replace(/<\/ul>\n<ul>/gim, ''); 
+
+    // Quebras de linha (convertidas para <br>)
+    html = html.replace(/\n/gim, '<br>');
+
+    return html.trim();
 }
 
-async function carregarStatus() {
-  const listEl = document.getElementById("recordsList");
-  try {
-    const res = await fetch("/api/status");
-    const data = await res.json();
-    listEl.innerHTML = "";
-    const items = Array.isArray(data.ultimosRegistros) ? data.ultimosRegistros : [];
-    if (items.length === 0) {
-      const li = document.createElement("li");
-      li.textContent = "API Online (" + (data.d1Connected ? "D1 Conectado ✅" : "Modo Diagnóstico Serverless ✅") + "). Nenhum registro gravado ainda.";
-      listEl.appendChild(li);
-      return;
-    }
-    items.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = "[" + (item.created_at || "agora") + "] " + item.username + " (" + item.user_id + "): " + item.conteudo;
-      listEl.appendChild(li);
-    });
-  } catch (err) {
-    listEl.innerHTML = "<li>Modo estático local. Publique no Cloudflare Pages para ativar /api/status.</li>";
-  }
-}
+/**
+ * 2. Inicialização da Aplicação
+ * Executa assim que o documento HTML carrega.
+ */
+document.addEventListener("DOMContentLoaded", async () => {
+    const appContainer = document.getElementById("app");
+    if (!appContainer) return;
 
-document.getElementById("sendBtn")?.addEventListener("click", async () => {
-  const input = document.getElementById("recordInput");
-  const statusEl = document.getElementById("statusMessage");
-  const conteudo = (input.value || "").trim();
-  if (!conteudo) return;
+    try {
+        // Verifica se o usuário está logado usando a rota que criamos
+        const response = await fetch("/api/status");
+        const data = await response.json();
 
-  statusEl.textContent = "Enviando para Cloudflare Function...";
-  try {
-    const res = await fetch("/api/status", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: discordSession.user_id,
-        username: discordSession.username,
-        conteudo,
-      }),
-    });
-    if (res.ok) {
-      input.value = "";
-      statusEl.textContent = "✓ Registro validado e processado na borda!";
-      await carregarStatus();
-    } else {
-      statusEl.textContent = "Erro ao registrar.";
+        if (data.authenticated) {
+            // Interface do usuário logado (Editor em tempo real)
+            appContainer.innerHTML = `
+                <header class="app-header">
+                    <h2>Meu Bloco de Notas</h2>
+                    <div class="user-profile">
+                        <img src="https://cdn.discordapp.com/avatars/${data.user.discord_id}/${data.user.avatar}.png" alt="Avatar" width="40" style="border-radius: 50%;">
+                        <span>${data.user.username}</span>
+                    </div>
+                </header>
+                <main class="editor-container">
+                    <div class="input-pane">
+                        <h3>Markdown</h3>
+                        <textarea id="md-input" placeholder="Escreva seu Markdown aqui... (Ex: # Título)"></textarea>
+                    </div>
+                    <div class="preview-pane">
+                        <h3>Visualização</h3>
+                        <div id="md-preview" class="preview-box"></div>
+                    </div>
+                </main>
+            `;
+
+            // Evento para atualizar a visualização em tempo real enquanto o usuário digita
+            const mdInput = document.getElementById("md-input");
+            const mdPreview = document.getElementById("md-preview");
+
+            mdInput.addEventListener("input", (e) => {
+                mdPreview.innerHTML = parseMarkdown(e.target.value);
+            });
+
+        } else {
+            // Interface de login
+            appContainer.innerHTML = `
+                <div class="login-container">
+                    <h1>Bloco de Notas Markdown</h1>
+                    <p>Faça login para salvar suas anotações com tags.</p>
+                    <a href="/api/auth/discord" class="btn-login">Entrar com Discord</a>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error("Erro ao carregar o status da aplicação:", error);
+        appContainer.innerHTML = `<p>Erro ao carregar o aplicativo. Verifique sua conexão.</p>`;
     }
-  } catch {
-    statusEl.textContent = "API disponível após o deploy no Cloudflare Pages.";
-  }
 });
-
-renderDiscordHeader();
-carregarStatus();
