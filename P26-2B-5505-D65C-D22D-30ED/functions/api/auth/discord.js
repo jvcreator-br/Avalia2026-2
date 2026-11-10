@@ -3,18 +3,18 @@ export async function onRequestGet(context) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
 
-  // Variáveis de ambiente que configuraremos no Cloudflare
-  const clientId = env.DISCORD_CLIENT_ID;
+  // Variáveis com valores de reserva (fallback)
+  const clientId = env.DISCORD_CLIENT_ID || "1569713280623181918";
   const clientSecret = env.DISCORD_CLIENT_SECRET;
-  const redirectUri = env.DISCORD_REDIRECT_URI;
+  const redirectUri = env.DISCORD_REDIRECT_URI || "https://p26-2b-5505-d65c-d22d-30ed.pages.dev/api/auth/discord";
 
-  // PASSO 1: Iniciar login (Redirecionar para o Discord se não houver código)
+  // PASSO 1: Redirecionar para o login do Discord
   if (!code) {
     const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
     return Response.redirect(discordAuthUrl, 302);
   }
 
-  // PASSO 2: Receber o código e trocar pelo Access Token
+  // PASSO 2: Trocar código por token de acesso
   try {
     const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
@@ -29,15 +29,15 @@ export async function onRequestGet(context) {
     });
     
     const tokenData = await tokenResponse.json();
-    if (!tokenData.access_token) return new Response("Falha na autorização", { status: 400 });
+    if (!tokenData.access_token) return new Response("Falha na autorização do Discord", { status: 400 });
 
-    // PASSO 3: Obter perfil do utilizador na API do Discord
+    // PASSO 3: Buscar perfil do usuário
     const userResponse = await fetch("https://discord.com/api/users/@me", {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
     const userData = await userResponse.json();
 
-    // PASSO 4: Guardar ou atualizar utilizador na base de dados D1
+    // PASSO 4: Registrar ou atualizar no banco D1
     const userId = crypto.randomUUID();
     await env.DB.prepare(`
       INSERT INTO users (id, discord_id, username, avatar) 
@@ -47,7 +47,7 @@ export async function onRequestGet(context) {
         avatar = excluded.avatar
     `).bind(userId, userData.id, userData.username, userData.avatar).run();
 
-    // PASSO 5: Criar cookie de sessão e redirecionar para a página principal
+    // PASSO 5: Definir cookie de sessão e retornar para a home
     const cookie = `session=${userData.id}; HttpOnly; Secure; Path=/; SameSite=Lax`;
     return new Response(null, {
       status: 302,
@@ -58,6 +58,6 @@ export async function onRequestGet(context) {
     });
 
   } catch (error) {
-    return new Response("Erro interno do servidor: " + error.message, { status: 500 });
+    return new Response("Erro interno no servidor: " + error.message, { status: 500 });
   }
 }
