@@ -14,7 +14,7 @@
       </div>
       <div class="discord-badge" id="discordProfile">
         <span id="discordUserText">Discord OAuth2</span>
-        <a href="/api/auth/logout" id="btnLogout" style="display:none; color: #ef4444; margin-left: 10px; font-weight: bold; text-decoration: none;">(Sair)</a>
+        <a href="/api/auth/logout" id="btnLogout" style="display:none; color: #ffcccc; margin-left: 10px; font-weight: bold; text-decoration: none;">(Sair)</a>
       </div>
     </div>
   </header>
@@ -31,20 +31,21 @@
     <section class="card">
       <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:0.85rem;">Editor Markdown</h2>
       
-      <input class="input-text" id="note-title" type="text" placeholder="Título da nota (opcional)" style="width:100%; margin-bottom: 0.75rem; box-sizing: border-box;">
+      <input class="input-text" id="note-title" type="text" placeholder="Título da nota (opcional)" style="margin-bottom: 0.75rem;">
       
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-        <div style="flex: 1; min-width: 280px;">
+      <!-- Aqui estão as novas classes que adicionámos -->
+      <div class="editor-container" style="margin-bottom: 0.75rem;">
+        <div class="editor-pane">
           <label for="md-input" style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Escreva em Markdown:</label>
-          <textarea id="md-input" rows="8" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;" placeholder="# Digite aqui...&#10;**Texto em negrito**&#10;- Item de lista"></textarea>
+          <textarea id="md-input" rows="8" placeholder="# Digite aqui...&#10;**Texto em negrito**&#10;- Item de lista"></textarea>
         </div>
-        <div style="flex: 1; min-width: 280px;">
+        <div class="editor-pane">
           <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Visualização (HTML):</label>
-          <div id="md-preview" style="padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; min-height: 180px; box-sizing: border-box;"></div>
+          <div id="md-preview"></div>
         </div>
       </div>
 
-      <input class="input-text" id="note-tags" type="text" placeholder="Tags (ex: aula, js, d1)" style="width:100%; margin-bottom: 0.75rem; box-sizing: border-box;">
+      <input class="input-text" id="note-tags" type="text" placeholder="Tags (ex: aula, js, d1)" style="margin-bottom: 0.75rem;">
 
       <div class="form-row">
         <button class="btn-primary" id="btn-save-note" type="button">Salvar no Cloudflare D1</button>
