@@ -13,109 +13,57 @@
         <strong>Projeto #12: Bloco de Notas em Markdown com Tags</strong>
       </div>
       <div class="discord-badge" id="discordProfile">
-        <span id="discordUserText">Discord OAuth2 · Conectado</span>
+        <span id="discordUserText">Discord OAuth2</span>
+        <a href="/api/auth/logout" id="btnLogout" style="display:none; color: #ef4444; margin-left: 10px; font-weight: bold; text-decoration: none;">(Sair)</a>
       </div>
     </div>
   </header>
 
   <main>
-    <!-- Cabeçalho e Descrição do Projeto -->
+    <!-- Apresentação -->
     <section class="card">
       <span class="pill">Projeto Oficial #12</span>
       <h1>Bloco de Notas em Markdown com Tags</h1>
-      <p class="desc">Crie um ambiente de anotações acadêmicas no qual o usuário escreve em sintaxe Markdown básica e visualiza a renderização HTML simultaneamente. Integrado com Cloudflare D1 e autenticação via Discord.</p>
-
-      <div class="form-row">
-        <input class="input-text" id="recordInput" type="text" placeholder="Digite um registro para gravar na Cloudflare Function + D1...">
-        <button class="btn-primary" id="sendBtn" type="button">Registrar no Cloudflare D1</button>
-      </div>
-      <div id="statusMessage" style="font-size:0.88rem;font-weight:700;color:#166534;margin-bottom:0.75rem;"></div>
+      <p class="desc">Escreva em sintaxe Markdown à esquerda e visualize o HTML gerado simultaneamente à direita. Salve suas notas no Cloudflare D1 com tags organizacionais.</p>
     </section>
 
-    <!-- Editor Markdown em Tempo Real -->
+    <!-- Editor Markdown -->
     <section class="card">
       <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:0.85rem;">Editor Markdown</h2>
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      
+      <input class="input-text" id="note-title" type="text" placeholder="Título da nota (opcional)" style="width:100%; margin-bottom: 0.75rem; box-sizing: border-box;">
+      
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
         <div style="flex: 1; min-width: 280px;">
           <label for="md-input" style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Escreva em Markdown:</label>
-          <textarea id="md-input" rows="8" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px;" placeholder="# Exemplo de Título&#10;**Texto em negrito**"></textarea>
+          <textarea id="md-input" rows="8" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;" placeholder="# Digite aqui...&#10;**Texto em negrito**&#10;- Item de lista"></textarea>
         </div>
         <div style="flex: 1; min-width: 280px;">
           <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Visualização (HTML):</label>
-          <div id="md-preview" style="padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; min-height: 160px;"></div>
+          <div id="md-preview" style="padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; min-height: 180px; box-sizing: border-box;"></div>
         </div>
       </div>
-    </section>
 
-    <!-- Registros Persistidos (Necessário para a validação) -->
-    <section class="card">
-      <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:0.85rem;">Registros Persistidos (Cloudflare Pages Functions + D1)</h2>
-      <ul class="records-list" id="recordsList">
-        <li>Carregando status da API serverless...</li>
-      </ul>
-    </section>
-  </main>
-
-  <footer id="projectFooter">
-    Chave Única de Auditoria: <code>P26-2B-5505-D65C-D22D-30ED</code> · Turma 2B · Licenciado sob MIT
-  </footer>
-
-  <script src="/app.js"></script>
-</body>
-</html><!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Projeto #12 — Bloco de Notas em Markdown com Tags</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div>
-        <strong>Projeto #12: Bloco de Notas em Markdown com Tags</strong>
-      </div>
-      <div class="discord-badge" id="discordProfile">
-        <span id="discordUserText">Discord OAuth2 · Conectado</span>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <!-- Cabeçalho e Descrição do Projeto -->
-    <section class="card">
-      <span class="pill">Projeto Oficial #12</span>
-      <h1>Bloco de Notas em Markdown com Tags</h1>
-      <p class="desc">Crie um ambiente de anotações acadêmicas no qual o usuário escreve em sintaxe Markdown básica e visualiza a renderização HTML simultaneamente. Integrado com Cloudflare D1 e autenticação via Discord.</p>
+      <input class="input-text" id="note-tags" type="text" placeholder="Tags (ex: aula, js, d1)" style="width:100%; margin-bottom: 0.75rem; box-sizing: border-box;">
 
       <div class="form-row">
-        <input class="input-text" id="recordInput" type="text" placeholder="Digite um registro para gravar na Cloudflare Function + D1...">
-        <button class="btn-primary" id="sendBtn" type="button">Registrar no Cloudflare D1</button>
+        <button class="btn-primary" id="btn-save-note" type="button">Salvar no Cloudflare D1</button>
       </div>
-      <div id="statusMessage" style="font-size:0.88rem;font-weight:700;color:#166534;margin-bottom:0.75rem;"></div>
+      <div id="statusMessage" style="font-size:0.88rem;font-weight:700;margin-top:0.5rem;"></div>
     </section>
 
-    <!-- Editor Markdown em Tempo Real -->
+    <!-- Registros Persistidos -->
     <section class="card">
-      <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:0.85rem;">Editor Markdown</h2>
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 280px;">
-          <label for="md-input" style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Escreva em Markdown:</label>
-          <textarea id="md-input" rows="8" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px;" placeholder="# Exemplo de Título&#10;**Texto em negrito**"></textarea>
-        </div>
-        <div style="flex: 1; min-width: 280px;">
-          <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Visualização (HTML):</label>
-          <div id="md-preview" style="padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; min-height: 160px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; flex-wrap:wrap; gap:0.5rem;">
+        <h2 style="font-size:1.15rem;font-weight:800;margin:0;">Notas Guardadas no Banco D1</h2>
+        <div style="display:flex; gap:0.5rem;">
+          <input class="input-text" id="search-input" type="text" placeholder="Buscar..." style="width:120px; padding:0.3rem 0.5rem;">
+          <input class="input-text" id="tag-filter-input" type="text" placeholder="Tag..." style="width:90px; padding:0.3rem 0.5rem;">
+          <button class="btn-primary" id="btn-filter" type="button" style="padding:0.3rem 0.75rem;">Filtrar</button>
         </div>
       </div>
-    </section>
-
-    <!-- Registros Persistidos (Necessário para a validação) -->
-    <section class="card">
-      <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:0.85rem;">Registros Persistidos (Cloudflare Pages Functions + D1)</h2>
       <ul class="records-list" id="recordsList">
-        <li>Carregando status da API serverless...</li>
+        <li>Carregando notas...</li>
       </ul>
     </section>
   </main>
